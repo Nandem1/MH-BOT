@@ -1,0 +1,29 @@
+2025/03/06-23:46:23.692 1658 Reusing MANIFEST C:\Users\Nande\Desktop\botfacturas-wsp\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/03/06-23:46:23.692 1658 Recovering log #428
+2025/03/06-23:46:23.764 1658 Reusing old log C:\Users\Nande\Desktop\botfacturas-wsp\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000428.log 
+2025/03/06-23:46:28.003 4874 Level-0 table #441: started
+2025/03/06-23:46:28.012 4874 Level-0 table #441: 662115 bytes OK
+2025/03/06-23:46:28.013 4874 Delete type=0 #428
+2025/03/06-23:46:28.013 4874 Manual compaction at level-0 from '\x009\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00:\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/03/06-23:46:29.747 4874 Compacting 1@1 + 9@2 files
+2025/03/06-23:46:29.811 4874 Generated table #442@1: 50897 keys, 2216664 bytes
+2025/03/06-23:46:29.835 4874 Generated table #443@1: 2733 keys, 2159149 bytes
+2025/03/06-23:46:29.861 4874 Generated table #444@1: 2948 keys, 2161209 bytes
+2025/03/06-23:46:29.886 4874 Generated table #445@1: 2715 keys, 2148750 bytes
+2025/03/06-23:46:29.942 4874 Generated table #446@1: 25808 keys, 2240685 bytes
+2025/03/06-23:46:30.004 4874 Generated table #447@1: 27582 keys, 2249068 bytes
+2025/03/06-23:46:30.057 4874 Generated table #448@1: 38749 keys, 2171801 bytes
+2025/03/06-23:46:30.161 4874 Generated table #449@1: 102486 keys, 2252412 bytes
+2025/03/06-23:46:30.228 4874 Generated table #450@1: 61712 keys, 1358944 bytes
+2025/03/06-23:46:30.228 4874 Compacted 1@1 + 9@2 files => 18958682 bytes
+2025/03/06-23:46:30.228 4874 compacted to: files[ 0 0 9 0 0 0 0 ]
+2025/03/06-23:46:30.229 4874 Delete type=2 #430
+2025/03/06-23:46:30.229 4874 Delete type=2 #431
+2025/03/06-23:46:30.229 4874 Delete type=2 #432
+2025/03/06-23:46:30.229 4874 Delete type=2 #433
+2025/03/06-23:46:30.229 4874 Delete type=2 #434
+2025/03/06-23:46:30.229 4874 Delete type=2 #435
+2025/03/06-23:46:30.229 4874 Delete type=2 #436
+2025/03/06-23:46:30.229 4874 Delete type=2 #437
+2025/03/06-23:46:30.229 4874 Delete type=2 #438
+2025/03/06-23:46:30.229 4874 Delete type=2 #441

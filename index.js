@@ -21,33 +21,12 @@ client.on("ready", () => {
   console.log("✅ Bot de WhatsApp conectado y listo para recibir mensajes.");
 });
 
+const GROUP_ID = process.env.GROUP_ID; // ID del grupo autorizado
+
 // Escuchar mensajes en WhatsApp
 client.on("message", async (message) => {
-  console.log(`📩 Mensaje recibido de ${message.from}: ${message.body}`);
-
-  if (message.body.toLowerCase() === "hola bot") {
-    await client.sendMessage(
-      message.from,
-      "¡Hola! Soy tu bot de facturas. ¿Cómo puedo ayudarte?"
-    );
-  }
-});
-
-client.on("message", async (message) => {
-  if (message.isGroupMsg) {
-    // Solo mostrar mensajes de grupos
-    console.log(
-      `📩 Mensaje recibido en el grupo: ${message.from} - ${message.body}`
-    );
-  }
-});
-
-const GROUP_ID = process.env.GROUP_ID; // Reemplaza con el ID real del grupo
-
-client.on("message", async (message) => {
   if (message.from === GROUP_ID) {
-    // Solo en el grupo autorizado
-    console.log(`📩 Mensaje recibido: ${message.body}`);
+    console.log(`📩 Mensaje recibido en grupo autorizado: ${message.body}`);
 
     // 📌 CONSULTAR FACTURA: "BOT, tráeme el folio X"
     if (message.body.toLowerCase().startsWith("trae el folio")) {
@@ -57,13 +36,15 @@ client.on("message", async (message) => {
         const response = await axios.get(
           `http://localhost:3000/api/facturas/${folio}`
         );
-        const factura = response.data;
+        const facturas = response.data;
 
-        if (factura) {
-          await client.sendMessage(
-            GROUP_ID,
-            `📄 Factura encontrada para el folio ${folio}: ${factura.image_url}`
-          );
+        if (facturas.length > 0) {
+          for (const factura of facturas) {
+            await client.sendMessage(
+              GROUP_ID,
+              `📄 Factura encontrada para el folio ${folio} (Proveedor: ${factura.proveedor}): ${factura.image_url}`
+            );
+          }
         } else {
           await client.sendMessage(
             GROUP_ID,
@@ -79,7 +60,7 @@ client.on("message", async (message) => {
       }
     }
 
-    // 📌 SUBIR FACTURA: Detectar imagen con texto "[FOLIO]_[PROVEEDOR]"
+    // 📌 SUBIR FACTURA: Detectar imagen con formato "FOLIO_PROVEEDOR"
     if (message.hasMedia && message.body.includes("_")) {
       const media = await message.downloadMedia();
       const [folio, proveedor] = message.body.split("_");
@@ -92,44 +73,35 @@ client.on("message", async (message) => {
         return;
       }
 
-      // Guardar la imagen temporalmente
       const fileName = `factura_${folio}.jpg`;
       const filePath = `./temp/${fileName}`;
 
-      require("fs").writeFileSync(filePath, media.data, "base64");
+      fs.writeFileSync(filePath, media.data, "base64");
 
-    // Enviar imagen al backend
-    const formData = new FormData();
-    formData.append('factura', fs.createReadStream(filePath)); // ✅ Corregido
-    formData.append('folio', folio);
-    formData.append('proveedor', proveedor);
+      // Enviar imagen al backend
+      const formData = new FormData();
+      formData.append('factura', fs.createReadStream(filePath));
+      formData.append('folio', folio);
+      formData.append('proveedor', proveedor);
 
       try {
         const response = await axios.post(
           "http://localhost:3000/api/uploadFactura",
           formData,
-          {
-            headers: { ...formData.getHeaders() },
-          }
+          { headers: { ...formData.getHeaders() } }
         );
 
-        console.log("✅ Respuesta recibida del backend:", response.status, response.data);
-
-        await client.sendMessage(
-          GROUP_ID,
-          `✅ Factura subida con éxito`
-        );
+        console.log("✅ Factura subida con éxito:", response.status, response.data);
+        await client.sendMessage(GROUP_ID, `✅ Factura del proveedor ${proveedor} con folio ${folio} subida con éxito.`);
       } catch (error) {
         console.error("❌ Error al subir factura:", error);
-        await client.sendMessage(
-          GROUP_ID,
-          "❌ Error al subir la factura. Inténtalo de nuevo."
-        );
+        await client.sendMessage(GROUP_ID, "❌ Error al subir la factura. Inténtalo de nuevo.");
       }
 
       // Eliminar el archivo temporal
-      require("fs").unlinkSync(filePath);
+      fs.unlinkSync(filePath);
     }
   }
 });
+
 client.initialize();

@@ -1,3 +1,6 @@
-2025/03/06-23:47:38.684 2618 Reusing MANIFEST C:\Users\Nande\Desktop\botfacturas-wsp\.wwebjs_auth\session\Default\Local Storage\leveldb/MANIFEST-000001
-2025/03/06-23:47:38.684 2618 Recovering log #6
-2025/03/06-23:47:38.685 2618 Reusing old log C:\Users\Nande\Desktop\botfacturas-wsp\.wwebjs_auth\session\Default\Local Storage\leveldb/000006.log 
+2025/03/07-17:02:46.645 104 Reusing MANIFEST C:\Users\Multihouse\OneDrive\Escritorio\MH-BOT\MH-BOT\.wwebjs_auth\session\Default\Local Storage\leveldb/MANIFEST-000001
+2025/03/07-17:02:46.645 104 Recovering log #4
+2025/03/07-17:02:46.645 104 Reusing old log C:\Users\Multihouse\OneDrive\Escritorio\MH-BOT\MH-BOT\.wwebjs_auth\session\Default\Local Storage\leveldb/000004.log 
+2025/03/07-18:12:30.731 2a4c Level-0 table #8: started
+2025/03/07-18:12:30.735 2a4c Level-0 table #8: 13419 bytes OK
+2025/03/07-18:12:30.737 2a4c Delete type=0 #4

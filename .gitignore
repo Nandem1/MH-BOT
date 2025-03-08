@@ -2,3 +2,9 @@
 /dist
 ```
 .env
+
+# WhatsApp Web Auth Cache
+.wwebjs_auth/
+.wwebjs_cache/
+
+/temp

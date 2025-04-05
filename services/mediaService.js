@@ -5,12 +5,13 @@ const { saveTempFile, deleteTempFile } = require('../utils/fileUtils');
 require('dotenv').config();
 
 const GROUP_ID = process.env.GROUP_ID;
+const API_LINK = process.env.API_LINK;
 
 // Consultar facturas en el backend
 const handleGetFactura = async (client, message) => {
   const folio = message.body.split(" ").pop();
   try {
-    const response = await axios.get(`http://localhost:3000/api/facturas/${folio}`);
+    const response = await axios.get(`${API_LINK}/${folio}`);
     const facturas = response.data;
 
     if (facturas.length > 0) {
@@ -47,7 +48,7 @@ const handleUploadFactura = async (client, message) => {
 
   try {
     const response = await axios.post(
-      "http://localhost:3000/api/uploadFactura",
+      `${API_LINK}/api/uploadFactura`,
       formData,
       { headers: { ...formData.getHeaders() } }
     );

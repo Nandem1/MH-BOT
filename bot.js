@@ -5,20 +5,26 @@ require('dotenv').config();
 
 const client = new Client({
   authStrategy: new LocalAuth(),
+  puppeteer: { 
+    headless: true,
+    args: [
+      '--no-sandbox', 
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage'
+    ],
+    executablePath: process.env.CHROMIUM_PATH || null
+  }
 });
 
-// Generar y mostrar el QR para iniciar sesión
 client.on("qr", (qr) => {
   console.log("Escanea este código QR con WhatsApp:");
   qrcode.generate(qr, { small: true });
 });
 
-// Confirmar que el bot está conectado
 client.on("ready", () => {
   console.log("✅ Bot de WhatsApp conectado y listo para recibir mensajes.");
 });
 
-// Delegar la gestión de mensajes al servicio correspondiente
 client.on("message", async (message) => {
   await handleMessage(client, message);
 });

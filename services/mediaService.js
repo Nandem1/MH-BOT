@@ -5,20 +5,21 @@ const { saveTempFile, deleteTempFile } = require('../utils/fileUtils');
 require('dotenv').config();
 
 const GROUP_ID = process.env.GROUP_ID;
-const API_LINK = process.env.API_LINK;
+const API_HOST = 'localhost';
+const API_PORT = '5000';
 
 // Consultar facturas en el backend
 const handleGetFactura = async (client, message) => {
   const folio = message.body.split(" ").pop();
   try {
-    const response = await axios.get(`https://${API_LINK}/${folio}`);
+    const response = await axios.get(`http://${API_HOST}:${API_PORT}/api/facturas/${folio}`);
     const facturas = response.data;
 
     if (facturas.length > 0) {
       for (const factura of facturas) {
         await client.sendMessage(
           GROUP_ID,
-          `📄 Factura encontrada para el folio ${folio} (Proveedor: ${factura.proveedor}): ${factura.image_url}`
+          `📄 Factura encontrada para el folio ${folio} (Proveedor: ${factura.proveedor}): ${factura.ruta_imagen}`
         );
       }
     } else {
@@ -33,34 +34,53 @@ const handleGetFactura = async (client, message) => {
 // Subir facturas al backend
 const handleUploadFactura = async (client, message) => {
   const media = await message.downloadMedia();
-  const [folio, proveedor] = message.body.split("_");
+  const [folio, rut] = message.body.split("_");
+  const whatsappId = message.from;
 
-  if (!folio || !proveedor) {
-    await client.sendMessage(GROUP_ID, "❌ Error: El formato debe ser [FOLIO]_[PROVEEDOR].");
+  if (!folio || !rut) {
+    await client.sendMessage(GROUP_ID, "❌ Error: El formato debe ser [FOLIO]_[RUT].");
     return;
   }
 
   const filePath = saveTempFile(media, folio);
-  const formData = new FormData();
-  formData.append('factura', fs.createReadStream(filePath));
-  formData.append('folio', folio);
-  formData.append('proveedor', proveedor);
 
   try {
+    // 🔥 Consultar al backend el id_usuario e id_local
+    const userResponse = await axios.get(`http://${API_HOST}:${API_PORT}/api/usuarios/${whatsappId}`);
+    const { id_usuario, id_local } = userResponse.data;
+
+    // Preparar FormData para subir
+    const formData = new FormData();
+    formData.append('factura', fs.createReadStream(filePath));
+    formData.append('folio', folio);
+    formData.append('rut', rut);
+    formData.append('id_usuario', id_usuario);
+    formData.append('id_local', id_local);
+
+    // 🔥 Subir la factura
     const response = await axios.post(
-      `https://${API_LINK}/api/uploadFactura`,
+      `http://${API_HOST}:${API_PORT}/api/uploadFactura`,
       formData,
       { headers: { ...formData.getHeaders() } }
     );
 
+    console.log("Subiendo factura con:", { folio, rut, id_usuario, id_local });
     console.log("✅ Factura subida con éxito:", response.status, response.data);
-    await client.sendMessage(GROUP_ID, `✅ Factura del proveedor ${proveedor} con folio ${folio} subida con éxito.`);
-  } catch (error) {
-    console.error("❌ Error al subir factura:", error);
-    await client.sendMessage(GROUP_ID, "❌ Error al subir la factura. Inténtalo de nuevo.");
-  }
+    await client.sendMessage(GROUP_ID, `✅ Factura subida con éxito para el folio ${folio}.`);
 
-  deleteTempFile(filePath);
+  } catch (error) {
+    console.error("❌ Error en uploadFactura:", error);
+
+    // 💥 Fallback: detectar usuario no registrado
+    if (error.response && error.response.status === 404) {
+      await client.sendMessage(GROUP_ID, "❌ Usuario no registrado. Por favor, contáctese con el administrador.");
+    } else {
+      await client.sendMessage(GROUP_ID, "❌ Error al subir la factura. Inténtalo de nuevo más tarde.");
+    }
+  } finally {
+    deleteTempFile(filePath);
+  }
 };
 
-module.exports = { handleGetFactura, handleUploadFactura };
+
+module.exports = { handleUploadFactura, handleGetFactura };

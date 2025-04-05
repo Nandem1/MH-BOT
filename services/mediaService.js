@@ -11,7 +11,7 @@ const API_LINK = process.env.API_LINK;
 const handleGetFactura = async (client, message) => {
   const folio = message.body.split(" ").pop();
   try {
-    const response = await axios.get(`${API_LINK}/${folio}`);
+    const response = await axios.get(`https://${API_LINK}/${folio}`);
     const facturas = response.data;
 
     if (facturas.length > 0) {
@@ -48,7 +48,7 @@ const handleUploadFactura = async (client, message) => {
 
   try {
     const response = await axios.post(
-      `${API_LINK}/api/uploadFactura`,
+      `https://${API_LINK}/api/uploadFactura`,
       formData,
       { headers: { ...formData.getHeaders() } }
     );

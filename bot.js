@@ -29,6 +29,7 @@ client.on("ready", () => {
 });
 
 client.on("message", async (message) => {
+  console.log("grupo: " + message.from)
   await handleMessage(client, message);
 });
 

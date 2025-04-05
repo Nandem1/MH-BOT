@@ -5,14 +5,16 @@ const { saveTempFile, deleteTempFile } = require('../utils/fileUtils');
 require('dotenv').config();
 
 const GROUP_ID = process.env.GROUP_ID;
-const API_HOST = 'localhost';
-const API_PORT = '5000';
+const API_HOST = process.env.API_HOST;
+const API_PORT = process.env.API_PORT || ''; // puede venir vacío
+
+const API_BASE_URL = API_PORT ? `http://${API_HOST}:${API_PORT}` : `https://${API_HOST}`;
 
 // Consultar facturas en el backend
 const handleGetFactura = async (client, message) => {
   const folio = message.body.split(" ").pop();
   try {
-    const response = await axios.get(`http://${API_HOST}:${API_PORT}/api/facturas/${folio}`);
+    const response = await axios.get(`${API_BASE_URL}/api/facturas/${folio}`);
     const facturas = response.data;
 
     if (facturas.length > 0) {
@@ -46,7 +48,7 @@ const handleUploadFactura = async (client, message) => {
 
   try {
     // 🔥 Consultar al backend el id_usuario e id_local
-    const userResponse = await axios.get(`http://${API_HOST}:${API_PORT}/api/usuarios/${whatsappId}`);
+    const userResponse = await axios.get(`${API_BASE_URL}/api/usuarios/${whatsappId}`);
     const { id_usuario, id_local } = userResponse.data;
 
     // Preparar FormData para subir
@@ -58,11 +60,9 @@ const handleUploadFactura = async (client, message) => {
     formData.append('id_local', id_local);
 
     // 🔥 Subir la factura
-    const response = await axios.post(
-      `http://${API_HOST}:${API_PORT}/api/uploadFactura`,
-      formData,
-      { headers: { ...formData.getHeaders() } }
-    );
+    const response = await axios.post(`${API_BASE_URL}/api/uploadFactura`, formData, {
+      headers: { ...formData.getHeaders() }
+    });
 
     console.log("Subiendo factura con:", { folio, rut, id_usuario, id_local });
     console.log("✅ Factura subida con éxito:", response.status, response.data);

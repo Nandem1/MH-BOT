@@ -1,5 +1,5 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
+const QRPortal = require('qrcode-terminal');
 const { handleMessage } = require('./services/messageService');
 require('dotenv').config();
 
@@ -17,8 +17,11 @@ const client = new Client({
 });
 
 client.on("qr", (qr) => {
-  console.log("Escanea este código QR con WhatsApp:");
-  qrcode.generate(qr, { small: true });
+  console.log("Escanea el QR desde esta URL (válido por 1 minuto):");
+  QRPortal.generate(qr, { small: true });
+  
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qr)}`;
+  console.log("O abre este enlace en tu navegador:", qrUrl);
 });
 
 client.on("ready", () => {

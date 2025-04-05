@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon bot.js",
+    "start": "node bot.js",
     "test": "jest"
   },
   "jest": {

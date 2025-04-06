@@ -37,7 +37,7 @@ const handleGetFactura = async (client, message) => {
 const handleUploadFactura = async (client, message) => {
   const media = await message.downloadMedia();
   const [folio, rut] = message.body.split("_");
-  const whatsappId = message.from;
+  const whatsappId = message.author;
 
   if (!folio || !rut) {
     await client.sendMessage(GROUP_ID, "❌ Error: El formato debe ser [FOLIO]_[RUT].");

@@ -7,7 +7,7 @@ const GROUP_ID = process.env.GROUP_ID;
 const handleMessage = async (client, message) => {
   if (message.from !== GROUP_ID) return;
   
-  console.log(`📩 Mensaje recibido en grupo autorizado: ${message.body + message.from}`);
+  console.log(`📩 Mensaje recibido en grupo autorizado: ${message.body + message.author}`);
 
   if (message.body.toLowerCase().startsWith("trae el folio")) {
     await handleGetFactura(client, message);

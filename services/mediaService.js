@@ -86,6 +86,12 @@ const handleUploadNotaCredito = async (client, message) => {
   const media = await message.downloadMedia();
   const whatsappId = message.author;
   
+  if (!media) {
+    console.error("❌ Media no descargada.");
+    await client.sendMessage(GROUP_ID, "❌ Error: No se pudo descargar la imagen de la Nota de Crédito.");
+    return;
+  }
+
   const match = message.body.match(/NC\s(\d+)\s-\sFA\s(\d+)/i);
 
   if (!match) {
@@ -98,12 +104,18 @@ const handleUploadNotaCredito = async (client, message) => {
 
   const filePath = saveTempFile(media, `nota_credito_${folio_nc}`);
 
+  if (!filePath || !fs.existsSync(filePath)) {
+    console.error("❌ Archivo temporal no creado correctamente.");
+    await client.sendMessage(GROUP_ID, "❌ Error interno al guardar la imagen. Inténtalo de nuevo.");
+    return;
+  }
+
   try {
-    // 🔥 Obtener usuario y local desde el backend
+    // 🔥 Obtener usuario y local desde backend
     const userResponse = await axios.get(`${API_BASE_URL}/api/usuarios/${whatsappId}`);
     const { id_usuario, id_local } = userResponse.data;
 
-    // 🔥 Buscar la factura referenciada en el backend
+    // 🔥 Buscar factura referenciada
     const facturaResponse = await axios.get(`${API_BASE_URL}/api/facturas/${folio_fa}`);
     const facturas = facturaResponse.data;
 
@@ -113,9 +125,9 @@ const handleUploadNotaCredito = async (client, message) => {
     }
 
     const id_factura_ref = facturas[0].id;
-    const id_proveedor = facturas[0].id_proveedor; // Tomamos el primer match
+    const id_proveedor = facturas[0].id_proveedor;
 
-    // 🔥 Subir Nota de Crédito + metadata en el mismo FormData
+    // 🔥 Subir todo en FormData
     const formData = new FormData();
     formData.append('nota_credito', fs.createReadStream(filePath));
     formData.append('folio_nc', folio_nc);
@@ -128,7 +140,7 @@ const handleUploadNotaCredito = async (client, message) => {
       headers: { ...formData.getHeaders() }
     });
 
-    console.log("✅ Nota de Crédito subida y registrada:", uploadResponse.data);
+    console.log("✅ Nota de Crédito subida:", uploadResponse.data);
     await client.sendMessage(GROUP_ID, `✅ Nota de Crédito ${folio_nc} asociada a la factura ${folio_fa} creada correctamente.`);
 
   } catch (error) {

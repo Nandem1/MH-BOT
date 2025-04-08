@@ -102,7 +102,8 @@ const handleUploadNotaCredito = async (client, message) => {
   const folio_nc = match[1];
   const folio_fa = match[2];
 
-  const filePath = saveTempFile(media, `nota_credito_${folio_nc}`);
+  const filePath = saveTempFile(media, folio_nc, 'nota_credito');
+
 
   if (!filePath || !fs.existsSync(filePath)) {
     console.error("❌ Archivo temporal no creado correctamente.");

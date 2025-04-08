@@ -115,28 +115,20 @@ const handleUploadNotaCredito = async (client, message) => {
     const id_factura_ref = facturas[0].id;
     const id_proveedor = facturas[0].id_proveedor; // Tomamos el primer match
 
-    // 🔥 Subir Nota de Crédito al backend
+    // 🔥 Subir Nota de Crédito + metadata en el mismo FormData
     const formData = new FormData();
     formData.append('nota_credito', fs.createReadStream(filePath));
+    formData.append('folio_nc', folio_nc);
+    formData.append('id_factura_ref', id_factura_ref);
+    formData.append('id_proveedor', id_proveedor);
+    formData.append('id_local', id_local);
+    formData.append('id_usuario', id_usuario);
 
-    // Primero subimos la imagen
     const uploadResponse = await axios.post(`${API_BASE_URL}/api/uploadNotaCredito`, formData, {
       headers: { ...formData.getHeaders() }
     });
 
-    const ruta_imagen_nc = uploadResponse.data.ruta_imagen; // asumimos que el backend responde con la ruta
-
-    // Crear la nota de crédito en la base de datos
-    await axios.post(`${API_BASE_URL}/api/notas_credito`, {
-      folio_nc,
-      id_factura_ref,
-      id_proveedor,
-      ruta_imagen: ruta_imagen_nc,
-      id_local,
-      id_usuario,
-    });
-
-    console.log("✅ Nota de Crédito creada con éxito");
+    console.log("✅ Nota de Crédito subida y registrada:", uploadResponse.data);
     await client.sendMessage(GROUP_ID, `✅ Nota de Crédito ${folio_nc} asociada a la factura ${folio_fa} creada correctamente.`);
 
   } catch (error) {
@@ -146,6 +138,7 @@ const handleUploadNotaCredito = async (client, message) => {
     deleteTempFile(filePath);
   }
 };
+
 
 
 

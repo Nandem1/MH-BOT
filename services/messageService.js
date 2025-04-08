@@ -1,4 +1,7 @@
 const { handleGetFactura, handleUploadFactura, handleUploadNotaCredito } = require('./mediaService');
+require('dotenv').config();
+
+const GROUP_ID = process.env.GROUP_ID;
 
 const handleMessage = async (client, message) => {
   if (message.from !== GROUP_ID) return;

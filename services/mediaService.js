@@ -83,9 +83,14 @@ const handleUploadFactura = async (client, message) => {
 };
 
 const handleUploadNotaCredito = async (client, message) => {
+  console.log("🔵 Iniciando handleUploadNotaCredito");
+
   const media = await message.downloadMedia();
   const whatsappId = message.author;
-  
+
+  console.log("📦 Media descargada:", media ? "✅ OK" : "❌ Error");
+  console.log("👤 Whatsapp ID:", whatsappId);
+
   if (!media) {
     console.error("❌ Media no descargada.");
     await client.sendMessage(GROUP_ID, "❌ Error: No se pudo descargar la imagen de la Nota de Crédito.");
@@ -93,6 +98,8 @@ const handleUploadNotaCredito = async (client, message) => {
   }
 
   const match = message.body.match(/NC\s(\d+)\s-\sFA\s(\d+)/i);
+
+  console.log("🔍 Resultado del match:", match);
 
   if (!match) {
     await client.sendMessage(GROUP_ID, "❌ Formato incorrecto para Nota de Crédito. Usa: NC 1234 - FA 4321");
@@ -102,8 +109,12 @@ const handleUploadNotaCredito = async (client, message) => {
   const folio_nc = match[1];
   const folio_fa = match[2];
 
+  console.log("🧾 Folio NC extraído:", folio_nc);
+  console.log("🧾 Folio FA extraído:", folio_fa);
+
   const filePath = saveTempFile(media, folio_nc, 'nota_credito');
 
+  console.log("📁 Ruta del archivo temporal:", filePath);
 
   if (!filePath || !fs.existsSync(filePath)) {
     console.error("❌ Archivo temporal no creado correctamente.");
@@ -112,13 +123,16 @@ const handleUploadNotaCredito = async (client, message) => {
   }
 
   try {
-    // 🔥 Obtener usuario y local desde backend
+    console.log("🛰️ Consultando datos de usuario y local...");
     const userResponse = await axios.get(`${API_BASE_URL}/api/usuarios/${whatsappId}`);
     const { id_usuario, id_local } = userResponse.data;
+    console.log("👤 ID Usuario:", id_usuario, "🏢 ID Local:", id_local);
 
-    // 🔥 Buscar factura referenciada
+    console.log("🛰️ Buscando factura de referencia...");
     const facturaResponse = await axios.get(`${API_BASE_URL}/api/facturas/${folio_fa}`);
     const facturas = facturaResponse.data;
+
+    console.log("📄 Factura encontrada:", facturas.length > 0 ? "✅ Sí" : "❌ No");
 
     if (!facturas.length) {
       await client.sendMessage(GROUP_ID, `❌ No se encontró la factura ${folio_fa} para asociar la Nota de Crédito.`);
@@ -128,32 +142,38 @@ const handleUploadNotaCredito = async (client, message) => {
     const id_factura_ref = facturas[0].id;
     const id_proveedor = facturas[0].id_proveedor;
 
-    // 🔥 Subir todo en FormData
+    console.log("🔗 ID Factura Ref:", id_factura_ref, "🏢 ID Proveedor:", id_proveedor);
+
+    console.log("📤 Preparando FormData para subida...");
     const formData = new FormData();
     formData.append('nota_credito', fs.createReadStream(filePath), {
       filename: `nota_credito_${folio_nc}.jpg`,
       contentType: 'image/jpeg'
-    });    
+    });
     formData.append('folio_nc', folio_nc);
     formData.append('id_factura_ref', id_factura_ref);
     formData.append('id_proveedor', id_proveedor);
     formData.append('id_local', id_local);
     formData.append('id_usuario', id_usuario);
 
+    console.log("🚀 Enviando FormData al backend...");
+
     const uploadResponse = await axios.post(`${API_BASE_URL}/api/uploadNotaCredito`, formData, {
       headers: { ...formData.getHeaders() }
     });
 
-    console.log("✅ Nota de Crédito subida:", uploadResponse.data);
+    console.log("✅ Respuesta del backend:", uploadResponse.data);
     await client.sendMessage(GROUP_ID, `✅ Nota de Crédito ${folio_nc} asociada a la factura ${folio_fa} creada correctamente.`);
 
   } catch (error) {
     console.error("❌ Error en handleUploadNotaCredito:", error);
     await client.sendMessage(GROUP_ID, "❌ Error al procesar la Nota de Crédito.");
   } finally {
+    console.log("🗑️ Eliminando archivo temporal...");
     deleteTempFile(filePath);
   }
 };
+
 
 
 

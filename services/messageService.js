@@ -1,9 +1,5 @@
-const { handleGetFactura, handleUploadFactura } = require('./mediaService');
-require('dotenv').config();
+const { handleGetFactura, handleUploadFactura, handleUploadNotaCredito } = require('./mediaService');
 
-const GROUP_ID = process.env.GROUP_ID;
-
-// Manejo centralizado de mensajes
 const handleMessage = async (client, message) => {
   if (message.from !== GROUP_ID) return;
   
@@ -11,8 +7,12 @@ const handleMessage = async (client, message) => {
 
   if (message.body.toLowerCase().startsWith("trae el folio")) {
     await handleGetFactura(client, message);
-  } else if (message.hasMedia && message.body.includes("_")) {
-    await handleUploadFactura(client, message);
+  } else if (message.hasMedia) {
+    if (message.body.toLowerCase().startsWith("nc")) {
+      await handleUploadNotaCredito(client, message); // 🔥 NUEVO: manejar NC
+    } else if (message.body.includes("_")) {
+      await handleUploadFactura(client, message); // 🔥 FACTURA normal
+    }
   }
 };
 

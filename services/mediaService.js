@@ -130,7 +130,10 @@ const handleUploadNotaCredito = async (client, message) => {
 
     // 🔥 Subir todo en FormData
     const formData = new FormData();
-    formData.append('nota_credito', fs.createReadStream(filePath));
+    formData.append('nota_credito', fs.createReadStream(filePath), {
+      filename: `nota_credito_${folio_nc}.jpg`,
+      contentType: 'image/jpeg'
+    });    
     formData.append('folio_nc', folio_nc);
     formData.append('id_factura_ref', id_factura_ref);
     formData.append('id_proveedor', id_proveedor);

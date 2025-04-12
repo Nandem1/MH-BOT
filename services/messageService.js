@@ -1,5 +1,6 @@
-const { handleUploadFactura, handleUploadNotaCredito } = require('./mediaService'); // 🔥 Solo upload aquí
-const { handleGetFactura } = require('./handlers/getFacturaHandler'); // 🔥 GetFactura separado
+const { handleUploadFactura } = require('./mediaService'); 
+const { handleUploadNotaCredito } = require('./handlers/uploadNotaCreditoHandler'); // ✅ import nuevo
+const { handleGetFactura } = require('./handlers/getFacturaHandler'); // ✅ import correcto
 require('dotenv').config();
 
 const GROUP_ID = process.env.GROUP_ID;
@@ -7,21 +8,14 @@ const GROUP_ID = process.env.GROUP_ID;
 const handleMessage = async (client, message) => {
   if (message.from !== GROUP_ID) return;
   
-  console.log(`📩 Mensaje recibido en grupo autorizado: ${message.body} - ${message.author}`);
+  console.log(`📩 Mensaje recibido en grupo autorizado: ${message.body} de ${message.author}`);
 
-  const bodyLower = message.body.toLowerCase();
-
-  if (bodyLower.startsWith("trae el folio")) {
-    console.log("🔍 Comando para traer factura detectado");
+  if (message.body.toLowerCase().startsWith("trae el folio")) {
     await handleGetFactura(client, message);
-  
   } else if (message.hasMedia) {
-    if (bodyLower.startsWith("nc")) {
-      console.log("🧾 Comando de Nota de Crédito detectado");
-      await handleUploadNotaCredito(client, message);
-    
+    if (message.body.toLowerCase().startsWith("nc")) {
+      await handleUploadNotaCredito(client, message); // ✅ llamado correcto
     } else if (message.body.includes("_")) {
-      console.log("🧾 Comando de Factura normal detectado");
       await handleUploadFactura(client, message);
     }
   }

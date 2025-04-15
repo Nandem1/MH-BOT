@@ -59,7 +59,7 @@ const handleMessage = async (client, message) => {
       id_proveedor,
       id_local,
       id_usuario,
-      client          // para feedback
+      whatsappId          // para feedback
     });
 
     console.log('📥 NC encolada en Redis');

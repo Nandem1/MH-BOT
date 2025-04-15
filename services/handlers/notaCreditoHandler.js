@@ -22,10 +22,7 @@ const processNotaCreditoJob = async (job) => {
 
     /* ---------- FormData ---------- */
     const fd = new FormData();
-    fd.append('nota_credito', fs.createReadStream(filePath), {
-      filename: path.basename(filePath),
-      contentType: 'image/jpeg'
-    });
+    fd.append('nota_credito', fs.createReadStream(filePath));
     fd.append('folio_nc',       folio_nc);
     fd.append('id_factura_ref', id_factura_ref);
     fd.append('id_proveedor',   id_proveedor);

@@ -33,21 +33,28 @@ const processNotaCreditoJob = async (job) => {
     console.log('📂 ¿Archivo existe?:', fs.existsSync(filePath));
     console.log('📂 Ruta del archivo:', filePath);
 
-    // Validar archivo
     if (!fs.existsSync(filePath)) {
       console.error('❌ [Redis‑NC] Archivo no existe en el sistema:', filePath);
       return;
     }
 
-    // Crear FormData correctamente
-    const fd = new FormData();
+    // Validar archivo y su nombre antes de construir el FormData
     const fileStream = fs.createReadStream(filePath);
     const fileName = path.basename(filePath);
 
-    console.log('📤 Preparando FormData...');
-    console.log('📂 fileName:', fileName);
-    console.log('📂 ¿Stream válido?', typeof fileStream.pipe === 'function');
+    if (!fileName || typeof fileStream.pipe !== 'function') {
+      console.error('❌ [Redis‑NC] Archivo inválido para FormData:', filePath);
+      return;
+    }
 
+    console.log('folio_nc 123:', folio_nc);
+    console.log('id_factura_ref 123:', id_factura_ref);
+    console.log('id_proveedor 123:', id_proveedor);
+    console.log('id_local 123:', id_local);
+    console.log('id_usuario 123:', id_usuario);
+
+    // Crear FormData correctamente
+    const fd = new FormData();
     fd.append('nota_credito', fileStream, {
       filename: fileName,
       contentType: 'image/jpeg'
@@ -59,16 +66,17 @@ const processNotaCreditoJob = async (job) => {
     fd.append('id_local', id_local);
     fd.append('id_usuario', id_usuario);
 
-    // Enviar a backend
+    console.log('📤 Enviando FormData al backend...');
+
     const response = await axios.post(`${API_BASE}/api/uploadNotaCredito`, fd, {
       headers: fd.getHeaders()
     });
 
     console.log(`✅ [Redis‑NC] Backend respondió con status ${response.status}`);
+
     deleteTempFile(filePath);
     console.log('🗑️ [Redis‑NC] Archivo temporal eliminado:', filePath);
 
-    // Confirmación por WhatsApp
     if (client) {
       await client.sendMessage(
         GROUP_ID,

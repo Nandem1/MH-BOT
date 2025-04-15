@@ -5,9 +5,10 @@ const { handleMessage } = require("./services/messageService");
 const { processFacturas } = require("./queues/facturaQueue");
 const { processFacturaJob } = require("./services/handlers/facturaHandler");
 const { processNotaCreditoJob } = require('./services/handlers/notaCreditoHandler');
-const { processNotasCredito  }  = require('./queues/notaCreditoQueue');
+const { processNotasCredito } = require('./queues/notaCreditoQueue');
 require("dotenv").config();
 
+// Inicializar cliente de WhatsApp
 const client = new Client({
   authStrategy: new LocalAuth(),
   puppeteer: {
@@ -23,21 +24,18 @@ const client = new Client({
 
 // Mostrar QR
 client.on("qr", (qr) => {
-  console.log("Escanea el QR desde esta URL (válido por 1 minuto):");
+  console.log("🟡 Escanea el QR desde esta URL (válido por 1 minuto):");
   QRPortal.generate(qr, { small: true });
-
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-    qr
-  )}`;
-  console.log("O abre este enlace en tu navegador:", qrUrl);
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qr)}`;
+  console.log("🔗 O abre este enlace en tu navegador:", qrUrl);
 });
 
-// Bot listo
+// Confirmación de conexión
 client.on("ready", () => {
   console.log("✅ Bot de WhatsApp conectado y listo para recibir mensajes.");
 });
 
-// Mensajes entrantes
+// Escuchar mensajes
 client.on("message", async (message) => {
   console.log("📩 Mensaje recibido del grupo:", message.from);
   await handleMessage(client, message);
@@ -47,17 +45,15 @@ client.on("message", async (message) => {
 client.initialize();
 
 // ===============================
-// 🔥 Procesar trabajos en Redis
+// 🔥 Trabajos en Redis
 // ===============================
-// Procesar trabajos en Redis
 console.log("🧠 Inicializando procesamiento de facturas desde Redis...");
 processFacturas(async (job) => {
   console.log("📥 Procesando trabajo recibido en Redis...");
   await processFacturaJob(job);
 });
 
-// Worker de NC
+// Notas de Crédito
 processNotasCredito(async (job) => {
-  console.log('📥 [Redis‑NC] Trabajo recibido');
-  await processNotaCreditoJob(job);
+  await processNotaCreditoJob(job); // ya imprime log al comenzar
 });

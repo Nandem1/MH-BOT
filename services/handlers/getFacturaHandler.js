@@ -21,8 +21,8 @@ const handleGetFactura = async (client, message) => {
         await client.sendMessage(
           GROUP_ID,
           `📄 Factura encontrada para el folio ${folio} (Proveedor: ${factura.proveedor}):\n` +
-          `🔗 ${factura.ruta_imagen}\n` +
-          (factura.ruta_cloudinary ? `☁️ Cloudinary: ${factura.ruta_cloudinary}` : '')
+          `🔗 ${factura.image_url_drive}\n` +
+          (factura.ruta_cloudinary ? `☁️ Cloudinary: ${factura.image_url_cloudinary}` : '')
         );
       }
     } else {

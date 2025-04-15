@@ -71,12 +71,16 @@ const handleUploadNotaCredito = async (client, message) => {
 
     console.log('📤 Subiendo Nota de Crédito al backend...');
 
-    await axios.post(`${API_BASE_URL}/api/uploadNotaCredito`, formData, {
+    const response = await axios.post(`${API_BASE_URL}/api/uploadNotaCredito`, formData, {
       headers: { ...formData.getHeaders() }
     });
 
-    await client.sendMessage(GROUP_ID, `✅ Nota de Crédito ${folio_nc} asociada correctamente a la factura ${folio_fa}.`);
-    console.log('✅ Nota de Crédito subida y confirmada.');
+    if (response.status === 201) {
+      await client.sendMessage(GROUP_ID, `✅ Nota de Crédito ${folio_nc} asociada correctamente a la factura ${folio_fa}.`);
+      console.log('✅ Nota de Crédito subida y confirmada.');
+    } else {
+      throw new Error(`Respuesta inesperada del backend: ${response.status}`);
+    }
 
   } catch (error) {
     console.error('❌ Error subiendo Nota de Crédito:', error);

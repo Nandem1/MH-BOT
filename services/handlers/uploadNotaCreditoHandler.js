@@ -1,6 +1,6 @@
-const fs = require('fs');
-const path = require('path');
+// handlers/uploadNotaCreditoHandler.js
 const axios = require('axios');
+const fs = require('fs');
 const FormData = require('form-data');
 const { saveTempFile, deleteTempFile } = require('../../utils/fileUtils');
 require('dotenv').config();
@@ -8,7 +8,6 @@ require('dotenv').config();
 const GROUP_ID = process.env.GROUP_ID;
 const API_HOST = process.env.API_HOST;
 const API_PORT = process.env.API_PORT || '';
-
 const API_BASE_URL = API_PORT ? `http://${API_HOST}:${API_PORT}` : `https://${API_HOST}`;
 
 const handleUploadNotaCredito = async (client, message) => {
@@ -42,6 +41,8 @@ const handleUploadNotaCredito = async (client, message) => {
   }
 
   try {
+    console.log('📦 Archivo temporal generado en:', filePath);
+
     const userResponse = await axios.get(`${API_BASE_URL}/api/usuarios/${whatsappId}`);
     const { id_usuario, id_local } = userResponse.data;
 
@@ -57,14 +58,15 @@ const handleUploadNotaCredito = async (client, message) => {
     const id_proveedor = facturas[0].id_proveedor;
 
     const formData = new FormData();
-    const stream = fs.createReadStream(filePath);
-    const filename = `nota_credito_${folio_nc}${path.extname(filePath)}`;
 
-    formData.append('nota_credito', stream, {
+    console.log('📤 Preparando subida de archivo:', filePath);
+    console.log('📂 Existe en disco:', fs.existsSync(filePath));
+
+    const filename = `nota_credito_${folio_nc}.jpg`;
+    formData.append('nota_credito', fs.createReadStream(filePath), {
       filename,
       contentType: 'image/jpeg'
     });
-
     formData.append('folio_nc', folio_nc);
     formData.append('id_factura_ref', id_factura_ref);
     formData.append('id_proveedor', id_proveedor);
@@ -73,12 +75,13 @@ const handleUploadNotaCredito = async (client, message) => {
 
     console.log('📤 Subiendo Nota de Crédito al backend...');
 
-    await axios.post(`${API_BASE_URL}/api/uploadNotaCredito`, formData, {
+    const response = await axios.post(`${API_BASE_URL}/api/uploadNotaCredito`, formData, {
       headers: formData.getHeaders()
     });
 
+    console.log('✅ Nota de Crédito subida correctamente:', response.data);
     await client.sendMessage(GROUP_ID, `✅ Nota de Crédito ${folio_nc} asociada correctamente a la factura ${folio_fa}.`);
-    console.log('✅ Nota de Crédito subida y confirmada.');
+
   } catch (error) {
     console.error('❌ Error subiendo Nota de Crédito:', error);
     await client.sendMessage(GROUP_ID, '❌ Error al procesar la Nota de Crédito.');

@@ -1,5 +1,6 @@
-const axios = require('axios');
 const fs = require('fs');
+const path = require('path');
+const axios = require('axios');
 const FormData = require('form-data');
 const { saveTempFile, deleteTempFile } = require('../../utils/fileUtils');
 require('dotenv').config();
@@ -41,11 +42,9 @@ const handleUploadNotaCredito = async (client, message) => {
   }
 
   try {
-    // Consultar datos de usuario
     const userResponse = await axios.get(`${API_BASE_URL}/api/usuarios/${whatsappId}`);
     const { id_usuario, id_local } = userResponse.data;
 
-    // Consultar datos de factura referenciada
     const facturaResponse = await axios.get(`${API_BASE_URL}/api/facturas/${folio_fa}`);
     const facturas = facturaResponse.data;
 
@@ -57,12 +56,15 @@ const handleUploadNotaCredito = async (client, message) => {
     const id_factura_ref = facturas[0].id;
     const id_proveedor = facturas[0].id_proveedor;
 
-    // Preparar FormData
     const formData = new FormData();
-    formData.append('nota_credito', fs.createReadStream(filePath), {
-      filename: `nota_credito_${folio_nc}.jpg`,
+    const stream = fs.createReadStream(filePath);
+    const filename = `nota_credito_${folio_nc}${path.extname(filePath)}`;
+
+    formData.append('nota_credito', stream, {
+      filename,
       contentType: 'image/jpeg'
     });
+
     formData.append('folio_nc', folio_nc);
     formData.append('id_factura_ref', id_factura_ref);
     formData.append('id_proveedor', id_proveedor);
@@ -71,17 +73,12 @@ const handleUploadNotaCredito = async (client, message) => {
 
     console.log('📤 Subiendo Nota de Crédito al backend...');
 
-    const response = await axios.post(`${API_BASE_URL}/api/uploadNotaCredito`, formData, {
-      headers: { ...formData.getHeaders() }
+    await axios.post(`${API_BASE_URL}/api/uploadNotaCredito`, formData, {
+      headers: formData.getHeaders()
     });
 
-    if (response.status === 201) {
-      await client.sendMessage(GROUP_ID, `✅ Nota de Crédito ${folio_nc} asociada correctamente a la factura ${folio_fa}.`);
-      console.log('✅ Nota de Crédito subida y confirmada.');
-    } else {
-      throw new Error(`Respuesta inesperada del backend: ${response.status}`);
-    }
-
+    await client.sendMessage(GROUP_ID, `✅ Nota de Crédito ${folio_nc} asociada correctamente a la factura ${folio_fa}.`);
+    console.log('✅ Nota de Crédito subida y confirmada.');
   } catch (error) {
     console.error('❌ Error subiendo Nota de Crédito:', error);
     await client.sendMessage(GROUP_ID, '❌ Error al procesar la Nota de Crédito.');

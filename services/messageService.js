@@ -66,7 +66,7 @@ const handleMessage = async (client, message) => {
       });
 
       console.log('📥 NC encolada en Redis');
-      await client.sendMessage(GROUP_ID, `✅ Nota de Crédito ${folio_nc} encolada para procesamiento.`);
+      // await client.sendMessage(GROUP_ID, `✅ Nota de Crédito ${folio_nc} encolada para procesamiento.`);
 
     } catch (error) {
       console.error('❌ Error en handleMessage para NC:', error);

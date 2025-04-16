@@ -6,6 +6,7 @@ const { processFacturas } = require("./queues/facturaQueue");
 const { processFacturaJob } = require("./services/handlers/facturaHandler");
 const { processNotaCreditoJob } = require('./services/handlers/notaCreditoHandler');
 const { processNotasCredito } = require('./queues/notaCreditoQueue');
+const { scheduleDailyReport } = require('./cron/dailyReportCron'); // ✅ NUEVO
 require("dotenv").config();
 
 // Inicializar cliente de WhatsApp
@@ -33,6 +34,7 @@ client.on("qr", (qr) => {
 // Confirmación de conexión
 client.on("ready", () => {
   console.log("✅ Bot de WhatsApp conectado y listo para recibir mensajes.");
+  scheduleDailyReport(client);
 });
 
 // Escuchar mensajes

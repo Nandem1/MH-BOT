@@ -50,7 +50,7 @@ const handleUploadFactura = async (client, message) => {
     await enqueueFactura(facturaPayload);
 
     console.log("📥 Factura encolada en Redis:", facturaPayload);
-    await client.sendMessage(GROUP_ID, `✅ Factura ${folio} encolada para procesamiento.`);
+    // await client.sendMessage(GROUP_ID, `✅ Factura ${folio} encolada para procesamiento.`);
 
   } catch (error) {
     console.error("❌ Error en handleUploadFactura:", error);

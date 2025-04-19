@@ -1,5 +1,5 @@
 // services/mediaService.js
-const { saveTempFile, deleteTempFile } = require('../utils/fileUtils');
+const { saveTempFile } = require('../utils/fileUtils');
 const { enqueueFactura } = require('../queues/facturaQueue');
 const { enqueueNotaCredito } = require('../queues/notaCreditoQueue');
 const axios = require('axios');
@@ -27,8 +27,13 @@ const handleUploadFactura = async (client, message) => {
     const whatsappId = message.author;
 
     if (!folio || !rut) {
-      console.warn("⚠️ Formato incorrecto del mensaje:", message.body);
-      await client.sendMessage(GROUP_ID, "❌ Error: El formato debe ser [FOLIO]_[RUT].");
+      await client.sendMessage(GROUP_ID, "❌ Formato inválido. Usa: [FOLIO]_[RUT]");
+      return;
+    }
+
+    if (!/^\d+$/.test(folio)) {
+      console.warn("❌ Folio inválido:", folio);
+      await client.sendMessage(GROUP_ID, "❌ El folio debe contener solo números.");
       return;
     }
 
@@ -48,9 +53,7 @@ const handleUploadFactura = async (client, message) => {
     };
 
     await enqueueFactura(facturaPayload);
-
     console.log("📥 Factura encolada en Redis:", facturaPayload);
-    // await client.sendMessage(GROUP_ID, `✅ Factura ${folio} encolada para procesamiento.`);
 
   } catch (error) {
     console.error("❌ Error en handleUploadFactura:", error);
@@ -72,7 +75,6 @@ const handleUploadNotaCredito = async (client, message) => {
     const whatsappId = message.author;
 
     if (!media) {
-      console.error('❌ No se pudo descargar media.');
       await client.sendMessage(GROUP_ID, '❌ Error al descargar la imagen.');
       return;
     }
@@ -85,10 +87,15 @@ const handleUploadNotaCredito = async (client, message) => {
 
     const folio_nc = match[1];
     const folio_fa = match[2];
-    const filePath = saveTempFile(media, `nc_${folio_nc}`, 'nota_credito');
 
+    if (!/^\d+$/.test(folio_nc) || !/^\d+$/.test(folio_fa)) {
+      console.warn("❌ Folios inválidos:", { folio_nc, folio_fa });
+      await client.sendMessage(GROUP_ID, "❌ Los folios deben contener solo números.");
+      return;
+    }
+
+    const filePath = saveTempFile(media, `nc_${folio_nc}`, 'nota_credito');
     if (!filePath || !fs.existsSync(filePath)) {
-      console.error('❌ Archivo temporal inválido.');
       await client.sendMessage(GROUP_ID, '❌ Error interno al guardar la imagen.');
       return;
     }
@@ -118,7 +125,6 @@ const handleUploadNotaCredito = async (client, message) => {
 
     await enqueueNotaCredito(ncPayload);
     console.log('📥 NC encolada en Redis');
-    await client.sendMessage(GROUP_ID, `✅ Nota de Crédito ${folio_nc} encolada para procesamiento.`);
 
   } catch (error) {
     console.error("❌ Error en handleUploadNotaCredito:", error);

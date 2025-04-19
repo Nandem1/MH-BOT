@@ -11,7 +11,7 @@ const API_BASE = API_PORT
   : `https://${API_HOST}`;
 
 const scheduleDailyReport = (client) => {
-  cron.schedule("30 20 * * *", async () => {
+  cron.schedule("30 00 * * *", async () => {
     try {
       console.log("📊 Enviando resumen diario...");
 

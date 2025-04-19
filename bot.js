@@ -3,10 +3,10 @@ const { Client, LocalAuth } = require("whatsapp-web.js");
 const QRPortal = require("qrcode-terminal");
 const { handleMessage } = require("./services/messageService");
 const { processFacturas } = require("./queues/facturaQueue");
-const { processFacturaJob } = require("./services/handlers/facturaHandler");
-const { processNotaCreditoJob } = require('./services/handlers/notaCreditoHandler');
-const { processNotasCredito } = require('./queues/notaCreditoQueue');
-const { scheduleDailyReport } = require('./cron/dailyReportCron'); // ✅ NUEVO
+const { processNotasCredito } = require("./queues/notaCreditoQueue");
+const { processFacturaJob } = require("./services/redisHandlers/facturaRedisHandler");
+const { processNotaCreditoJob } = require("./services/redisHandlers/notaCreditoRedisHandler");
+const { scheduleDailyReport } = require("./cron/dailyReportCron");
 require("dotenv").config();
 
 // Inicializar cliente de WhatsApp
@@ -55,7 +55,6 @@ processFacturas(async (job) => {
   await processFacturaJob(job);
 });
 
-// Notas de Crédito
 processNotasCredito(async (job) => {
-  await processNotaCreditoJob(job); // ya imprime log al comenzar
+  await processNotaCreditoJob(job);
 });

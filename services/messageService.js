@@ -3,6 +3,7 @@ const { handleUploadFactura } = require('./messageHandlers/handleUploadFactura')
 const { handleNotaCreditoUpload } = require('./messageHandlers/handleNotaCreditoUpload');
 const { handleFacturaConsulta } = require('./messageHandlers/handleFacturaConsulta');
 const { handleGeneric } = require('./messageHandlers/handleGeneric');
+const { handleDailyReport } = require('../cron/dailyReportCron');
 require('dotenv').config();
 
 const GROUP_ID = process.env.GROUP_ID;
@@ -22,6 +23,10 @@ const handleMessage = async (client, message) => {
 
   if (msg.includes('_') && message.hasMedia) {
     return await handleUploadFactura(client, message);
+  }
+
+  if (msg.startsWith('!daily')) {
+    return handleDailyReport(client);
   }
 
   return await handleGeneric(client, message); // Para otros mensajes no contemplados

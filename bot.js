@@ -33,13 +33,11 @@ client.on("qr", (qr) => {
 
 // Confirmación de conexión
 client.on("ready", () => {
-  console.log("✅ Bot de WhatsApp conectado y listo para recibir mensajes.");
   scheduleDailyReport(client);
 });
 
 // Escuchar mensajes
-client.on("message", async (message) => {
-  console.log("📩 Mensaje recibido del grupo:", message.from);
+client.on("message", async (message) => { // Obtener participantes del grupo
   await handleMessage(client, message);
 });
 

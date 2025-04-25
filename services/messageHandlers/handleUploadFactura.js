@@ -1,4 +1,4 @@
-// services/messageHandlers/handleFacturaUpload.js
+// services/messageHandlers/handleUploadFactura.js
 const { saveTempFile } = require('../../utils/fileUtils');
 const { enqueueFactura } = require('../../queues/facturaQueue');
 const axios = require('axios');
@@ -29,6 +29,17 @@ const handleUploadFactura = async (client, message) => {
       return;
     }
 
+    // 🔍 Validar existencia del proveedor por RUT
+    try {
+      await axios.get(`${API_BASE_URL}/api/proveedorByRut/${rut}`);
+    } catch (error) {
+      if (error.response?.status === 404) {
+        await client.sendMessage(GROUP_ID, `❌ El proveedor con RUT *${rut}* no está registrado.`);
+        return;
+      }
+      throw error;
+    }
+
     const filePath = saveTempFile(media, folio);
 
     const userResponse = await axios.get(`${API_BASE_URL}/api/usuarios/${whatsappId}`);
@@ -45,7 +56,6 @@ const handleUploadFactura = async (client, message) => {
     };
 
     await enqueueFactura(facturaPayload);
-
     console.log("📥 Factura encolada en Redis:", facturaPayload);
     // await client.sendMessage(GROUP_ID, `✅ Factura ${folio} encolada para procesamiento.`);
 

@@ -29,7 +29,7 @@ const processFacturaJob = async (job) => {
     form.append('id_usuario', id_usuario);
     form.append('id_local', id_local);
 
-    const response = await axios.post(`${API_BASE}/api/uploadFactura`, form, {
+    const response = await axios.post(`${API_BASE}/api-beta/uploadFactura`, form, {
       headers: form.getHeaders()
     });
 

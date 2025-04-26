@@ -15,7 +15,7 @@ const handleFacturaConsulta = async (client, message) => {
       return;
     }
 
-    const response = await axios.get(`${API_BASE_URL}/api/facturas/${folio}`);
+    const response = await axios.get(`${API_BASE_URL}/api-beta/facturas/${folio}`);
     const factura = response.data[0];
 
     if (!factura) {

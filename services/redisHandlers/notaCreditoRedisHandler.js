@@ -49,7 +49,7 @@ const processNotaCreditoJob = async (job) => {
     form.append('id_local', id_local);
     form.append('id_usuario', id_usuario);
 
-    const response = await axios.post(`${API_BASE}/api/uploadNotaCredito`, form, {
+    const response = await axios.post(`${API_BASE}/api-beta/uploadNotaCredito`, form, {
       headers: form.getHeaders(),
     });
 

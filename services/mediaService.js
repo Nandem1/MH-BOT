@@ -39,7 +39,7 @@ const handleUploadFactura = async (client, message) => {
 
     const filePath = saveTempFile(media, folio);
 
-    const userResponse = await axios.get(`${API_BASE_URL}/api/usuarios/${whatsappId}`);
+    const userResponse = await axios.get(`${API_BASE_URL}/api-beta/usuarios/${whatsappId}`);
     const { id_usuario, id_local } = userResponse.data;
 
     const facturaPayload = {
@@ -100,10 +100,10 @@ const handleUploadNotaCredito = async (client, message) => {
       return;
     }
 
-    const userResponse = await axios.get(`${API_BASE_URL}/api/usuarios/${whatsappId}`);
+    const userResponse = await axios.get(`${API_BASE_URL}/api-beta/usuarios/${whatsappId}`);
     const { id_usuario, id_local } = userResponse.data;
 
-    const facturaResponse = await axios.get(`${API_BASE_URL}/api/facturas/${folio_fa}`);
+    const facturaResponse = await axios.get(`${API_BASE_URL}/api-beta/facturas/${folio_fa}`);
     const facturas = facturaResponse.data;
 
     if (!facturas.length) {

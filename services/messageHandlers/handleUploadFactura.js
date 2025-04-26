@@ -35,7 +35,7 @@ const handleUploadFactura = async (client, message) => {
 
     if (rut) {
       try {
-        await axios.get(`${API_BASE_URL}/api/proveedorByRut/${rut}`);
+        await axios.get(`${API_BASE_URL}/api-beta/proveedorByRut/${rut}`);
         proveedorExiste = true;
       } catch (error) {
         if (error.response?.status === 404) {
@@ -51,7 +51,7 @@ const handleUploadFactura = async (client, message) => {
 
     const filePath = saveTempFile(media, folio);
 
-    const userResponse = await axios.get(`${API_BASE_URL}/api/usuarios/${whatsappId}`);
+    const userResponse = await axios.get(`${API_BASE_URL}/api-beta/usuarios/${whatsappId}`);
     const { id_usuario, id_local } = userResponse.data;
 
     const facturaPayload = {

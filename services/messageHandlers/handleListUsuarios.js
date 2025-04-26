@@ -24,7 +24,7 @@ const handleListUsuarios = async (client, message) => {
   }
 
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/usuarios`);
+    const response = await axios.get(`${API_BASE_URL}/api-beta/usuarios`);
     const usuarios = response.data;
 
     if (!usuarios.length) {

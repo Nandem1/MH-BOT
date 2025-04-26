@@ -20,24 +20,33 @@ const handleUploadFactura = async (client, message) => {
       return;
     }
 
-    const [folio, rut] = message.body.split("_");
+    const [folioRaw, rutRaw] = message.body.split("_");
+    const folio = folioRaw?.trim();
+    let rut = rutRaw?.trim();
     const whatsappId = message.author;
 
-    if (!folio || !rut || !/^[0-9]+$/.test(folio)) {
+    if (!folio || !/^[0-9]+$/.test(folio)) {
       console.warn("⚠️ Formato incorrecto del mensaje o folio no numérico:", message.body);
-      await client.sendMessage(GROUP_ID, "❌ Error: El formato debe ser [FOLIO_NUM]_[RUT].");
+      await client.sendMessage(GROUP_ID, "❌ Error: El formato debe ser [FOLIO_NUM]_[RUT] o [FOLIO_NUM] solamente.");
       return;
     }
 
-    // 🔍 Validar existencia del proveedor por RUT
-    try {
-      await axios.get(`${API_BASE_URL}/api/proveedorByRut/${rut}`);
-    } catch (error) {
-      if (error.response?.status === 404) {
-        await client.sendMessage(GROUP_ID, `❌ El proveedor con RUT *${rut}* no está registrado.`);
-        return;
+    let proveedorExiste = false;
+
+    if (rut) {
+      try {
+        await axios.get(`${API_BASE_URL}/api/proveedorByRut/${rut}`);
+        proveedorExiste = true;
+      } catch (error) {
+        if (error.response?.status === 404) {
+          console.warn(`⚠️ Proveedor con RUT ${rut} no encontrado. Se usará GENERIC.`);
+          rut = "GENERIC";
+        } else {
+          throw error;
+        }
       }
-      throw error;
+    } else {
+      rut = "GENERIC";
     }
 
     const filePath = saveTempFile(media, folio);
@@ -56,8 +65,15 @@ const handleUploadFactura = async (client, message) => {
     };
 
     await enqueueFactura(facturaPayload);
+
     console.log("📥 Factura encolada en Redis:", facturaPayload);
-    // await client.sendMessage(GROUP_ID, `✅ Factura ${folio} encolada para procesamiento.`);
+
+    if (!proveedorExiste) {
+      await client.sendMessage(GROUP_ID, `⚠️ Factura *${folio}* encolada en modo *GENERIC* (Proveedor no registrado).`);
+    }
+    // else {
+    //   await client.sendMessage(GROUP_ID, `✅ Factura ${folio} encolada para procesamiento.`);
+    // }
 
   } catch (error) {
     console.error("❌ Error en handleUploadFactura:", error);

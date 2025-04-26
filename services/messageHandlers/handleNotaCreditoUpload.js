@@ -1,3 +1,4 @@
+// services/messageHandlers/handleNotaCreditoUpload.js
 const { saveTempFile } = require('../../utils/fileUtils');
 const { enqueueNotaCredito } = require('../../queues/notaCreditoQueue');
 const axios = require('axios');
@@ -31,7 +32,6 @@ const handleNotaCreditoUpload = async (client, message) => {
     const folio_nc = match[1];
     const folio_fa = match[2];
 
-    // Validar que ambos sean solo números
     if (!/^[0-9]+$/.test(folio_nc) || !/^[0-9]+$/.test(folio_fa)) {
       await client.sendMessage(GROUP_ID, '❌ Los folios deben contener solo números.');
       return;
@@ -48,16 +48,23 @@ const handleNotaCreditoUpload = async (client, message) => {
     const userResponse = await axios.get(`${API_BASE_URL}/api/usuarios/${whatsappId}`);
     const { id_usuario, id_local } = userResponse.data;
 
-    const facturaResponse = await axios.get(`${API_BASE_URL}/api/facturas/${folio_fa}`);
-    const facturas = facturaResponse.data;
+    let id_factura_ref = null;
+    let id_proveedor = null;
 
-    if (!facturas.length) {
-      await client.sendMessage(GROUP_ID, `❌ Factura ${folio_fa} no encontrada para asociar la NC.`);
-      return;
+    try {
+      const facturaResponse = await axios.get(`${API_BASE_URL}/api/facturas/${folio_fa}`);
+      const facturas = facturaResponse.data;
+
+      if (facturas.length) {
+        id_factura_ref = facturas[0].id;
+        id_proveedor = facturas[0].id_proveedor;
+      } else {
+        //await client.sendMessage(GROUP_ID, `⚠️ Factura ${folio_fa} no encontrada, la Nota de Crédito será subida sin referencia.`);
+      }
+    } catch (error) {
+      console.warn(`⚠️ No se encontró la factura ${folio_fa}:`, error.response?.status || error.message);
+      //await client.sendMessage(GROUP_ID, `⚠️ Factura ${folio_fa} no encontrada, la Nota de Crédito será subida sin referencia.`);
     }
-
-    const id_factura_ref = facturas[0].id;
-    const id_proveedor = facturas[0].id_proveedor;
 
     const ncPayload = {
       folio_nc,
@@ -70,7 +77,6 @@ const handleNotaCreditoUpload = async (client, message) => {
 
     await enqueueNotaCredito(ncPayload);
     console.log('📥 NC encolada en Redis');
-    // await client.sendMessage(GROUP_ID, `✅ Nota de Crédito ${folio_nc} encolada para procesamiento.`);
 
   } catch (error) {
     console.error("❌ Error en handleUploadNotaCredito:", error);

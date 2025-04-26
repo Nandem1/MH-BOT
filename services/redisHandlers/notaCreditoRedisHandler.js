@@ -40,7 +40,7 @@ const processNotaCreditoJob = async (job) => {
     }
 
     console.log("\ud83d\udcdd Enviando NC al backend...");
-    await axios.post(`${API_BASE_URL}/api/uploadNotaCredito`, form, {
+    await axios.post(`${API_BASE_URL}/api-beta/uploadNotaCredito`, form, {
       headers: form.getHeaders(),
       maxBodyLength: Infinity,
     });

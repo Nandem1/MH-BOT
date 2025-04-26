@@ -69,7 +69,7 @@ const handleUploadFactura = async (client, message) => {
     console.log("📥 Factura encolada en Redis:", facturaPayload);
 
     if (!proveedorExiste) {
-      await client.sendMessage(GROUP_ID, `⚠️ Factura *${folio}* encolada en modo *GENERIC* (Proveedor no registrado).`);
+      // await client.sendMessage(GROUP_ID, `⚠️ Factura *${folio}* encolada en modo *GENERIC* (Proveedor no registrado).`);
     }
     // else {
     //   await client.sendMessage(GROUP_ID, `✅ Factura ${folio} encolada para procesamiento.`);

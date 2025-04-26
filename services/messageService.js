@@ -26,7 +26,7 @@ const handleMessage = async (client, message) => {
     return await handleNotaCreditoUpload(client, message);
   }
 
-  if (msg.includes('_') && message.hasMedia) {
+  if ((/^\d+$/.test(msg) || msg.includes('_')) && message.hasMedia) {
     return await handleUploadFactura(client, message);
   }
 

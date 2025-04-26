@@ -1,63 +1,57 @@
 // services/redisHandlers/notaCreditoRedisHandler.js
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
-const FormData = require('form-data');
-const { deleteTempFile } = require('../../utils/fileUtils');
-require('dotenv').config();
+const fs = require("fs");
+const FormData = require("form-data");
+const axios = require("axios");
+const path = require("path");
+require("dotenv").config();
 
-const GROUP_ID = process.env.GROUP_ID;
 const API_HOST = process.env.API_HOST;
-const API_PORT = process.env.API_PORT || '';
-const API_BASE = API_PORT ? `http://${API_HOST}:${API_PORT}` : `https://${API_HOST}`;
+const API_PORT = process.env.API_PORT || "";
+const API_BASE_URL = API_PORT ? `http://${API_HOST}:${API_PORT}` : `https://${API_HOST}`;
 
 const processNotaCreditoJob = async (job) => {
+  console.log("\ud83d\udcc5 [Redis\u2011NC] Trabajo recibido");
+
   try {
-    if (!job?.data) {
-      console.error('❌ [Redis‑NC] Job vacío');
+    const { folio_nc, filePath, id_factura_ref, id_proveedor, id_local, id_usuario } = job.data;
+
+    if (!filePath || !fs.existsSync(filePath)) {
+      console.error("❌ Archivo temporal de NC no encontrado:", filePath);
       return;
     }
 
-    const {
-      folio_nc,
-      filePath,
-      id_factura_ref,
-      id_proveedor,
-      id_local,
-      id_usuario,
-    } = job.data;
-
-    console.log('📥 [Redis‑NC] Trabajo recibido');
-    console.log('📦 Job data:', job.data);
-
-    if (!fs.existsSync(filePath)) {
-      console.error('❌ [Redis‑NC] Archivo no encontrado:', filePath);
-      return;
-    }
-
-    const fileName = path.basename(filePath);
-    const fileStream = fs.createReadStream(filePath);
+    console.log("\ud83d\udd04 \u001b[1mNC activa\u001b[0m \u2192", { id_local, folio_nc, id_usuario });
 
     const form = new FormData();
-    form.append('nota_credito', fileStream, {
-      filename: fileName,
-      contentType: 'image/jpeg',
-    });
-    form.append('folio_nc', folio_nc);
-    form.append('id_factura_ref', id_factura_ref);
-    form.append('id_proveedor', id_proveedor);
-    form.append('id_local', id_local);
-    form.append('id_usuario', id_usuario);
 
-    const response = await axios.post(`${API_BASE}/api-beta/uploadNotaCredito`, form, {
+    // Agregar imagen
+    const fileName = `nc_${folio_nc}.jpg`;
+    form.append("nota_credito", fs.createReadStream(filePath), fileName);
+
+    // Agregar campos del body
+    form.append("folio_nc", folio_nc);
+    form.append("id_local", id_local);
+    form.append("id_usuario", id_usuario);
+
+    // Si existe id_factura_ref y id_proveedor, enviarlos
+    if (id_factura_ref && id_proveedor) {
+      form.append("id_factura_ref", id_factura_ref);
+      form.append("id_proveedor", id_proveedor);
+    }
+
+    console.log("\ud83d\udcdd Enviando NC al backend...");
+    await axios.post(`${API_BASE_URL}/api/uploadNotaCredito`, form, {
       headers: form.getHeaders(),
+      maxBodyLength: Infinity,
     });
 
-    console.log(`✅ [Redis‑NC] Subida exitosa. Status: ${response.status}`);
-    deleteTempFile(filePath);
+    console.log("✅ Nota de Crédito subida exitosamente.");
 
-  } catch (err) {
-    console.error('❌ [Redis‑NC] Error al procesar NC:', err);
+    // Eliminar archivo temporal
+    fs.unlinkSync(filePath);
+
+  } catch (error) {
+    console.error("❌ [Redis\u2011NC] Error al procesar NC:", error);
   }
 };
 

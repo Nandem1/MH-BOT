@@ -23,7 +23,7 @@ const scheduleDailyReport = (client) => {
           )})...`
         );
 
-        const { data } = await axios.get(`${API_BASE}/api/reporte-diario`);
+        const { data } = await axios.get(`${API_BASE}/api-beta/reporte-diario`);
         const { facturas_hoy, notas_credito_hoy } = data;
 
         const mensaje = `📄 *Resumen Diario:*

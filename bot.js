@@ -33,6 +33,7 @@ client.on("qr", (qr) => {
 
 // Confirmación de conexión
 client.on("ready", () => {
+  console.log("🟢 Conectado a WhatsApp Web.");
   scheduleDailyReport(client);
 });
 

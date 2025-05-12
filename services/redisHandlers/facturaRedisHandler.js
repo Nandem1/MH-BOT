@@ -36,7 +36,7 @@ const processFacturaJob = async (job) => {
     console.log(`✅ [Redis‑FA] Backend respondió: ${response.status}`);
     deleteTempFile(filePath);
   } catch (error) {
-    console.error('❌ [Redis‑FA] Error al procesar factura:', error.message);
+    console.error('❌ [Redis‑FA] Error al procesar factura:', error.message + error);
   }
 };
 

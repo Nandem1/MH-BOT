@@ -13,7 +13,7 @@ const API_BASE = API_PORT
 
 const scheduleDailyReport = (client) => {
   cron.schedule(
-    "30 20 * * *",
+    "30 21 * * *",
     async () => {
       try {
         const chileTime = moment().tz("America/Santiago");

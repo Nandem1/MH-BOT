@@ -39,7 +39,7 @@ client.on("ready", () => {
 
 // Escuchar mensajes
 client.on("message", async (message) => {
-  console.log ("📝 Mensaje recibido:", message.body + "del grupo: ", message.from + "de la persona: ", message.author);
+  // console.log ("📝 Mensaje recibido:", message.body + "del grupo: ", message.from + "de la persona: ", message.author);
   await handleMessage(client, message);
 });
 
